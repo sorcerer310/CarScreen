@@ -13,3 +13,14 @@
 .externalNativeBuild
 .cxx
 local.properties
+/.idea/.gitignore
+/app/src/generated/debug/javalite/aicc_adas/AiccAdas.java
+/app/src/generated/release/javalite/aicc_adas/AiccAdas.java
+/.idea/compiler.xml
+/.idea/gradle.xml
+/gradle/wrapper/gradle-wrapper.jar
+/gradle/wrapper/gradle-wrapper.properties
+/.idea/jarRepositories.xml
+/.idea/misc.xml
+/app/release/output-metadata.json
+/.idea/vcs.xml
