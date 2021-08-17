@@ -1,0 +1,14 @@
+#include <jni.h>
+#include <string>
+#include "include/assimp/port/AndroidJNI/AndroidJNIIOSystem.h"
+
+extern "C" JNIEXPORT jstring JNICALL
+Java_com_aicc_carscreen_MainActivity_stringFromJNI(
+        JNIEnv* env,
+        jobject /* this */) {
+    std::string hello = "Hello from C++";
+
+    Assimp::Importer* importer = new Assimp::Importer();
+
+    return env->NewStringUTF(hello.c_str());
+}

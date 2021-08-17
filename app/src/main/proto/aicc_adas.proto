@@ -1,0 +1,118 @@
+syntax = "proto3";
+package aicc_adas;
+//package com.aicc.carscreen.protobuf;
+message Header {
+  string channel = 1;
+}
+
+message LaneLine {
+  float c0 = 1;
+  float c1 = 2;
+  float c2 = 3;
+  float c3 = 4;
+}
+//路由（接收）：/hmi/lane
+message Lane {
+  oneof has_left_boundary {
+    LaneLine left_boundary = 1;
+  }
+  oneof has_right_boudnary {
+    LaneLine right_boundary = 2;
+  }
+}
+
+message Obstacle {
+   uint32 id = 1;
+   float distance = 2;
+   float velocity = 3;
+   float acceleration = 4;
+}
+//路由（接收）：/hmi/cipv
+message CIPV {
+  oneof has_obstacle{
+   Obstacle cipv = 1;
+  }
+}
+
+//按钮，每个按钮可使用一个单独的topic
+// 速度增加按钮（发送）：/hmi/button/speed_plus
+// 取消按钮（发送）：/hmi/button/cancel
+// 跟车距离按钮（发送）：/hmi/button/keep_distance
+// 速度减少按钮（发送）：/hmi/button/speed_sub
+// 拨杆换道按钮（发送）：/hmi/button/change_lane
+// 换道跟随按钮（发送）：/hmi/button/horizontal_follow
+// lks按钮（发送）：/hmi/button/lks
+message Button {
+  enum Event{
+    CLICKED = 0;
+  }
+  Event event = 1;
+}
+
+//开关，每个开关可使用一个单独的topic
+//路由（发送/周期）：/hmi/switch/acc
+message Switch {
+  enum State{
+    OFF = 0;
+    ON = 1;
+  }
+  State state = 1;
+}
+
+//经度、纬度、角度
+//路由（接收）：/hmi/location
+message Location {
+    double lat = 1;
+    double lon = 2;
+    float  bearing = 3;
+}
+
+//定位数据
+//路由（接收）：/hmi/gnss
+message GNSS {
+  oneof has_location{
+    Location location=1;
+  }
+}
+
+//ACC图标状态数据
+//路由（接收）：/hmi/state/acc
+message ACCState {
+  enum ACCStateEnum{
+    INACTIVE = 0;
+    ACTIVE = 1;
+    PAUSE = 2;
+    ON = 3;
+  }
+  ACCStateEnum state = 1;
+}
+
+//ACC目标速度
+//路由（接收）：/hmi/acc_target_velocity
+message ACCTargetVelocity {
+  float targetVelocity = 1;
+}
+
+//ACC跟车距离
+//路由（接收）：/hmi/state/keep_distance
+message ACCKeepDistance {
+  enum DistanceStage{
+    NO_GAP = 0;
+    STAGE1 = 1;
+    STAGE2 = 2;
+    STAGE3 = 3;
+    STAGE4 = 4;
+  }
+  DistanceStage keep_distance = 1;
+}
+
+//off、on双状态图标显示
+//路由：
+// lks图标状态（接收）：/hmi/state/lks
+// hws图标状态（接收）：/hmi/state/hwa
+// 拨杆换道图标（接收）：/hmi/state/change_lane
+// 横向跟车图标（接收）：/hmi/state/horizontal_follow
+message State {
+  bool state = 1;
+}
+

@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">CarScreen</string>
+    <string name="bt_acc_up">上</string>
+    <string name="bt_acc_down">下</string>
+    <string name="bt_acc_left">前</string>
+    <string name="bt_acc_right">后</string>
+    <string name="iv_acc">ACC图标</string>
+    <string name="iv_lks">lks图标</string>
+    <string name="sw_acc">ACC</string>
+    <string name="bt_lks">LKS</string>
+    <string name="bt_cl">拨杆换道</string>
+    <string name="bt_hc">横向跟车</string>
+    <string name="ibt_cancel">Cancel</string>
+    <string name="tb_acc">ACC</string>
+    <string name="tb_lks">LKS</string>
+    <string name="tb_start_acc">开启ACC</string>
+    <string name="tb_end_acc">关闭ACC</string>
+    <string name="tb_start_lks">开启LKS</string>
+    <string name="tb_end_lks">关闭LKS</string>
+    <string name="alert_dialog_ok">OK</string>
+    <string name="alert_dialog_cancel">Cancel</string>
+    <string name="storage_description_title">允许存储权限吗?</string>
+    <string name="storage_description_why_we_need_the_permission">你好,地图缓存需要存储权限。允许吗?</string>
+    <string name="location_description_title">允许定位权限吗?</string>
+    <string name="location_description_why_we_need_the_permission">你好,定位功能需要获取位置权限。允许吗?</string>
+    <string name="bt_set_plus">SET/+</string>
+    <string name="bt_set_sub">一</string>
+    <string name="tv_change_lane">拨杆换道</string>
+    <string name="tv_horizontal_follow">横向跟车</string>
+    <string name="ibt_speedup">车距保持</string>
+    <string name="iv_car">本车</string>
+</resources>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GridLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:layout_weight="1"
+    android:columnCount="4"
+    android:rowCount="1">
+
+    <GridLayout
+        android:id="@+id/accGridLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_row="0"
+        android:layout_column="0"
+        android:layout_gravity="top"
+        android:columnCount="3"
+        android:rowCount="3">
+
+        <Button
+            android:id="@+id/bt_set_plus"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:layout_row="0"
+            android:layout_column="1"
+            android:layout_columnSpan="1"
+            android:background="@drawable/btn_selector"
+            android:text="@string/bt_set_plus"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/bt_cancel"
+            android:layout_width="100dp"
+            android:layout_height="45dp"
+            android:layout_row="1"
+            android:layout_column="0"
+            android:background="@drawable/btn_selector"
+            android:text="@string/ibt_cancel"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+
+        <!--            android:text="@string/sw_acc"-->
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/sw_acc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_row="1"
+            android:layout_column="1"
+            android:layout_columnWeight="1"
+            android:layout_gravity="center"
+            android:padding="5dp"
+            android:showText="true"
+            android:textOn="ACC"
+            android:textOff="ACC"
+            android:textSize="15sp"
+            android:scaleX="1.5"
+            android:scaleY="1.5"
+            />
+<!--        android:thumb="@drawable/switch_thumb"-->
+<!--        android:track="@drawable/switch_track"-->
+
+
+        <!--            android:scaleX="1.5"-->
+        <!--            android:scaleY="1.5"-->
+
+        <ImageButton
+            android:id="@+id/ibt_keep_distance"
+            android:layout_width="100dp"
+            android:layout_height="45dp"
+            android:layout_row="1"
+            android:layout_column="2"
+            android:background="@drawable/btn_selector"
+            android:contentDescription="@string/ibt_speedup"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/dk_no_gap" />
+
+        <Button
+            android:id="@+id/bt_set_sub"
+            android:layout_width="100dp"
+            android:layout_height="40dp"
+            android:layout_row="2"
+            android:layout_column="1"
+            android:layout_columnSpan="1"
+            android:layout_gravity="center"
+            android:text="@string/bt_set_sub"
+            android:textColor="@color/white"
+            android:textSize="25sp"
+            android:background="@drawable/btn_selector"
+            />
+
+
+    </GridLayout>
+
+    <Button
+        android:id="@+id/bt_cl"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_row="0"
+        android:layout_column="1"
+        android:layout_columnWeight="2"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/btn_selector"
+        android:text="@string/bt_cl"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/bt_hf"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_row="0"
+        android:layout_column="2"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/btn_selector"
+        android:text="@string/bt_hc"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/bt_lks"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_row="0"
+        android:layout_column="3"
+        android:layout_columnWeight="2"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/btn_selector"
+        android:text="@string/bt_lks"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
+</GridLayout>
