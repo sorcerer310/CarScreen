@@ -11,14 +11,14 @@ Car::Car(){
     m_ScaleX = 1.0f;
     m_ScaleY = 1.0f;
 
-//    m_pModel = nullptr;
+    m_pModel = nullptr;
 
 }
 
 Car::~Car(){}
 
 void Car::Init(){
-//    if(m_pModel != nullptr && m_pShader != nullptr) return;
+    if(m_pModel != nullptr && m_pShader != nullptr) return;
 
     char vShaderStr[] =
             "#version 300 es\n"
