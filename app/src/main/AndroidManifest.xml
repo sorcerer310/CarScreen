@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.aicc.carscreen">
-    <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
+    <uses-feature android:glEsVersion="0x00030002" android:required="true"/>
 
 
     <!-- 用于进行网络定位 -->
