@@ -62,11 +62,11 @@ public class MainActivity extends AppCompatActivity {
         //每3秒检查一次mqtt的连接，如果未连接则重新连接并重新订阅。
         seService.scheduleAtFixedRate(()->{
             if(!AICCMqtt.getInstance().isConnected()) {
-                System.out.println("--------------AICCMqtt is not connected");
+//                System.out.println("--------------AICCMqtt is not connected");
                 AICCMqtt.getInstance().reConnect();
             }
-            else
-                System.out.println("++++++++++++++AICCMqtt is connected");
+//            else
+//                System.out.println("++++++++++++++AICCMqtt is connected");
 
         },0,3000, TimeUnit.MILLISECONDS);
     }

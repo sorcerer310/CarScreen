@@ -52,14 +52,14 @@ public:
     {
         glm::vec3 vec3 = (abs(minXyz) + abs(maxXyz)) / 2.0f;
         float maxDis = fmax(vec3.x, fmax(vec3.y, vec3.z));
-        LOGCATE("Model::GetMaxViewDistance maxDis=%f", maxDis);
+//        LOGCATE("Model::GetMaxViewDistance maxDis=%f", maxDis);
         return maxDis;
     }
 
     glm::vec3 GetAdjustModelPosVec()
     {
         glm::vec3 vec3 = (minXyz + maxXyz) / 2.0f;
-        LOGCATE("Model::GetAdjustModelPosVec vec3(%f, %f, %f)", vec3.x, vec3.y, vec3.z);
+//        LOGCATE("Model::GetAdjustModelPosVec vec3(%f, %f, %f)", vec3.x, vec3.y, vec3.z);
         return (minXyz + maxXyz) / 2.0f;
     }
 
@@ -87,7 +87,7 @@ private:
         // check for errors
         if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
         {
-            LOGCATE("Model::loadModel path=%s, assimpError=%s", path.c_str(), importer.GetErrorString());
+//            LOGCATE("Model::loadModel path=%s, assimpError=%s", path.c_str(), importer.GetErrorString());
             return;
         }
         DEBUG_LOGCATE();

@@ -39,6 +39,14 @@ JNIEXPORT void JNICALL Java_com_aicc_carscreen_view_lane_opengl_MyNativeRender_n
     MyGLRenderContext::GetInstance()->OnDrawFrame();
 }
 
+JNIEXPORT void JNICALL Java_com_aicc_carscreen_view_lane_opengl_MyNativeRender_native_1UpdateTransformMatrix(JNIEnv *env,jobject instance,jfloat rotateX,jfloat rotateY,jfloat scaleX,jfloat scaleY){
+    MyGLRenderContext::GetInstance()->UpdateTransformMatrix(rotateX,rotateY,scaleX,scaleY);
+}
+
+JNIEXPORT void JNICALL Java_com_aicc_carscreen_view_lane_opengl_MyNativeRender_native_1SetParamFloat(JNIEnv *env,jobject instance,jint paramType,jfloat value0,jfloat value1){
+    MyGLRenderContext::GetInstance()->SetParamsFloat(paramType,value0,value1);
+}
+
 #ifdef __cplusplus
 }
 #endif

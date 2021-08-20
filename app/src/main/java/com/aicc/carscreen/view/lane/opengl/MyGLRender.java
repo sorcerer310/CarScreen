@@ -10,6 +10,7 @@ import javax.microedition.khronos.opengles.GL10;
 public class MyGLRender implements GLSurfaceView.Renderer{
     private static final String TAG = "MyGLRender";
     private MyNativeRender mNativeRender;
+    private int mSampleType;
 
     public MyGLRender(){
         mNativeRender = new MyNativeRender();
@@ -29,10 +30,24 @@ public class MyGLRender implements GLSurfaceView.Renderer{
 
     @Override
     public void onDrawFrame(GL10 gl) {
+        System.out.println("---------------onDrawFrame----------------");
 //        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         mNativeRender.native_OnDrawFrame();
     }
 
+    public void updateTransformMatrix(float rotateX,float rotateY,float scaleX,float scaleY){
+        mNativeRender.native_UpdateTransformMatrix(rotateX,rotateY,scaleX,scaleY);
+    }
 
+    public void setTouchLoc(float x,float y){
+        mNativeRender.native_SetParamFloat(MyNativeRender.SAMPLE_TYPE_SET_TOUCH_LOC,x,y);
+    }
 
+    public void setGravityXY(float x,float y){
+        mNativeRender.native_SetParamFloat(MyNativeRender.SAMPLE_TYPE_GRAITY_XY,x,y);
+    }
+
+    public int getSampleType(){
+        return mSampleType;
+    }
 }

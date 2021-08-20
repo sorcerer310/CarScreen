@@ -39,8 +39,8 @@
 <!--                <fragment-->
 <!--                    android:id="@+id/fg_lane_3d"-->
 <!--                    android:name="com.aicc.carscreen.fragment.LaneFragment3d"-->
-<!--                    android:layout_width="200dp"-->
-<!--                    android:layout_height="200dp"-->
+<!--                    android:layout_width="500dp"-->
+<!--                    android:layout_height="500dp"-->
 <!--                    android:layout_gravity="left|bottom"-->
 <!--                    >-->
 <!--                </fragment>-->

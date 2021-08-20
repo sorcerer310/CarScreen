@@ -4,7 +4,7 @@
 
 #include "Car.h"
 
-Car::Car(){
+Car::Car() {
     m_AngleX = 0;
     m_AngleY = 0;
 
@@ -15,10 +15,10 @@ Car::Car(){
 
 }
 
-Car::~Car(){}
+Car::~Car() {}
 
-void Car::Init(){
-    if(m_pModel != nullptr && m_pShader != nullptr) return;
+void Car::Init() {
+    if (m_pModel != nullptr && m_pShader != nullptr) return;
 
     char vShaderStr[] =
             "#version 300 es\n"
@@ -89,17 +89,100 @@ void Car::Init(){
             "    vec3 finalColor = (ambient + diffuse + specular) * vec3(objectColor);\n"
             "    outColor = vec4(finalColor, 1.0);\n"
             "}";
+
+    //TODO 资源拷贝到/sdcard/Android/data/com.byteflow.app/files/Download 路径下，然后可选择你要加载的模型
+
+    std::string path(DEFAULT_OGL_ASSETS_DIR);
+    m_pModel = new Model(path + "/model/poly/Apricot_02_hi_poly.obj");
+
+    if (m_pModel->ContainsTextures()) {
+        m_pShader = new Shader(vShaderStr, fShaderStr);
+    } else {
+        m_pShader = new Shader(vShaderStr, fNoTextureShaderStr);
+    }
+
 }
 
-void Car::Draw(int screenW,int screenH)
-{
-
+void Car::LoadImage(NativeImage *pImage) {
+    LOGCATE("Car::LoadImage pImage = %p", pImage->ppPlane[0]);
 }
-void Car::Destroy()
-{
 
+void Car::Draw(int screenW, int screenH) {
+    if (m_pModel == nullptr || m_pShader == nullptr) return;
+
+    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+
+    UpdateMVPMatrix(m_MVPMatrix, m_AngleX, m_AngleY, (float) screenW / screenH);
+
+    m_pShader->use();
+    m_pShader->setMat4("u_MVPMatrix", m_MVPMatrix);
+    m_pShader->setMat4("u_ModelMatrix", m_ModelMatrix);
+    m_pShader->setVec3("lightPos", glm::vec3(0, 0, m_pModel->GetMaxViewDistance()));
+    m_pShader->setVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    m_pShader->setVec3("viewPos", glm::vec3(0, 0, m_pModel->GetMaxViewDistance()));
+    m_pModel->Draw((*m_pShader));
 }
-void Car::UpdateTransformMatrix(float rotateX,float rotateY,float scaleX,float scaleY)
-{
 
+void Car::Destroy() {
+    LOGCATE("Car::Destroy");
+    if (m_pModel != nullptr) {
+        m_pModel->Destroy();
+        delete m_pModel;
+        m_pModel = nullptr;
+    }
+
+    if (m_pShader != nullptr) {
+        m_pShader->Destroy();
+        delete m_pShader;
+        m_pShader = nullptr;
+    }
+}
+
+/**
+ * 绘制前对模型矩阵变换
+ * @param mvpMatrix
+ * @param angleX
+ * @param angleY
+ * @param ratio
+ */
+void Car::UpdateMVPMatrix(glm::mat4 &mvpMatrix, int angleX, int angleY, float ratio) {
+    LOGCATE("Car::UpdateMVPMatrix angleX=%d,angleY = %d,ratio = %f",angleX,angleY,ratio);
+    angleX = angleX % 360;
+    angleY = angleY % 360;
+
+    float radiansX = static_cast<float>(MATH_PI / 180.0f * angleX);
+    float radiansY = static_cast<float>(MATH_PI / 180.0F * angleY);
+
+    glm::mat4 Projection = glm::frustum(-ratio, ratio, -1.0f, 1.0f, 1.0f,
+                                        m_pModel->GetMaxViewDistance() * 4);
+
+    glm::mat4 View = glm::lookAt(
+            glm::vec3(0, 0, m_pModel->GetMaxViewDistance() * 1.8f),
+            glm::vec3(0, 0, 0),
+            glm::vec3(0, 1, 0)
+    );
+
+    m_ScaleY = 1.0f;
+    m_ScaleX = 1.0f;
+    glm::mat4 Model = glm::mat4(1.0f);
+    Model = glm::scale(Model, glm::vec3(m_ScaleX, m_ScaleY, 1.0f));
+    Model = glm::rotate(Model, radiansX, glm::vec3(1.0f, 0.0f, 0.0f));
+    Model = glm::rotate(Model, radiansY, glm::vec3(0.0f, 1.0f, 0.0f));
+    Model = glm::translate(Model, -m_pModel->GetAdjustModelPosVec());
+    m_ModelMatrix = Model;
+    mvpMatrix = Projection * View * Model;
+    LOGCATE("Car::updateMVPMatrix mvpMatrix.length=%d",mvpMatrix.length());
+}
+
+void Car::UpdateTransformMatrix(float rotateX, float rotateY, float scaleX, float scaleY) {
+    GLSampleBase::UpdateTransformMatrix(rotateX, rotateY, scaleX, scaleY);
+    m_AngleX = static_cast<int>(rotateX);
+    m_AngleY = static_cast<int>(rotateY);
+    m_ScaleX = scaleX;
+    m_ScaleY = scaleY;
+
+    LOGCATE("Car::UpdateTransformMatrix rotateX = %f, rotateY = %f, scaleX = %f,scaleY = %f",
+            rotateX, rotateY, scaleX, scaleY);
 }

@@ -7,6 +7,7 @@
 
 #include "stdint.h"
 #include <GLES3/gl3.h>
+#include <GLSampleBase.h>
 
 
 class MyGLRenderContext {
@@ -14,15 +15,22 @@ class MyGLRenderContext {
     ~MyGLRenderContext();
 
 public:
+    void SetParamsFloat(int paramType,float value0,float value1);
+    void UpdateTransformMatrix(float rotateX,float rotateY,float scaleX,float scaleY);
     void OnSurfaceCreated();
     void OnSurfaceChanged(int width,int height);
     void OnDrawFrame();
+
 
     static MyGLRenderContext* GetInstance();
     static void DestroyInstance();
 
 private:
     static MyGLRenderContext *m_pContext;
+    GLSampleBase *m_pBeforeSample;
+    GLSampleBase *m_pCurSample;
+    int m_ScreenW;
+    int m_ScreenH;
 };
 
 
