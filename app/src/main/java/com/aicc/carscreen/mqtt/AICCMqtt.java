@@ -150,6 +150,11 @@ public class AICCMqtt {
             Log.e("Lane View", e.getMessage());
         }
     }
+
+    /**
+     * 订阅顶部图标状态
+     * @param handler
+     */
     private void subscribeTopFragment(Handler handler){
         try{
             mqttClient.subscribe("/hmi/state/acc",0,(topic,message)->{
@@ -171,7 +176,17 @@ public class AICCMqtt {
                 Utils.sendByteArrayMessage(handler,"hwa",message);
             });
         }catch(MqttException e){
-            Log.e("Top Fragmen",e.getMessage());
+            Log.e("Top Fragment",e.getMessage());
+        }
+    }
+
+    private void subscribeBottomFragment(Handler handler){
+        try{
+            mqttClient.subscribe("/hmi/state/keep_distance",0,(topic,message)->{
+                Utils.sendByteArrayMessage(handler,"keep_distance",message);
+            });
+        }catch(MqttException e){
+            Log.e("Bottom Fragment",e.getMessage());
         }
     }
 

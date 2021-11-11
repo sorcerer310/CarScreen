@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
 //                topFragment.initSubscribe();
 //                laneFragment.initSubscribe();
-                bottomFragment.initSubscribe();
+//                bottomFragment.initSubscribe();
                 mapView.initSubscribe();
 //                AICCMqtt.getInstance().reConnect();
             }
@@ -99,6 +99,8 @@ public class MainActivity extends AppCompatActivity {
                 )
                     topFragment.notifyMessage(bundle);
 
+                if(bundle.getByteArray("keep_distance")!=null)
+                    bottomFragment.notifyMessage(bundle);
 //                    laneFragment.setArguments(msg.getData());
             }
         };
