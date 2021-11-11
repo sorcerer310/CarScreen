@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.Window;
@@ -15,6 +17,9 @@ import com.aicc.carscreen.fragment.LaneFragment;
 import com.aicc.carscreen.fragment.TopFragment;
 import com.aicc.carscreen.map.AICCMapView;
 import com.aicc.carscreen.mqtt.AICCMqtt;
+import com.aicc.carscreen.view.lane.LaneView;
+
+import org.eclipse.paho.client.mqttv3.MqttClient;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -29,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private TopFragment topFragment;
     private LaneFragment laneFragment;
     private BottomFragment bottomFragment;
+    private Handler msgHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,9 +45,9 @@ public class MainActivity extends AppCompatActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getSupportActionBar().hide();
         setContentView(R.layout.activity_main);
-        mapView = (AICCMapView) findViewById(R.id.aiccmap);
-        mapView.onCreate(savedInstanceState);
-        mapView.setZoomButton(findViewById(R.id.bt_zoom_in),findViewById(R.id.bt_zoom_out));
+//        mapView = (AICCMapView) findViewById(R.id.aiccmap);
+//        mapView.onCreate(savedInstanceState);
+//        mapView.setZoomButton(findViewById(R.id.bt_zoom_in),findViewById(R.id.bt_zoom_out));
 
         topFragment = (TopFragment) fragmentManager.findFragmentById(R.id.fg_top);
         laneFragment = (LaneFragment) fragmentManager.findFragmentById(R.id.fg_lane);
@@ -52,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 topFragment.initSubscribe();
-                laneFragment.initSubscribe();
+//                laneFragment.initSubscribe();
                 bottomFragment.initSubscribe();
                 mapView.initSubscribe();
 //                AICCMqtt.getInstance().reConnect();
@@ -69,14 +75,32 @@ public class MainActivity extends AppCompatActivity {
 //                System.out.println("++++++++++++++AICCMqtt is connected");
 
         },0,3000, TimeUnit.MILLISECONDS);
+
+        initSubscribe();
     }
 
+
+    void initSubscribe(){
+        msgHandler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                Bundle bundle = msg.getData();
+                if(bundle.getByteArray("lane")!=null
+                    || bundle.getByteArray("cipv")!=null) {
+                    laneFragment.getView_lane().notifyMessage(bundle);
+                }
+//                    laneFragment.setArguments(msg.getData());
+            }
+        };
+        AICCMqtt mqtt = AICCMqtt.getInstance();
+        mqtt.subscribeAllTopices(msgHandler);
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mapView.onResume();
-        mapView.getmLocationClient().startLocation();
+//        mapView.onResume();
+//        mapView.getmLocationClient().startLocation();
     }
 
     @Override

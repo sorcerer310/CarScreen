@@ -16,6 +16,7 @@ import com.aicc.carscreen.view.lane.LaneView;
  */
 public class LaneFragment extends Fragment {
     private TextView tv_cipv, tv_lane;
+
     private LaneView view_lane = null;
 
     @Override
@@ -33,13 +34,17 @@ public class LaneFragment extends Fragment {
     /**
      * 初始化重新订阅内容
      */
-    public void initSubscribe(){
-        view_lane.initSubscribe();
-    }
+//    public void initSubscribe(){
+//        view_lane.initSubscribe();
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle saveInstanceState) {
         View view = inflater.inflate(R.layout.fragment_lane, container, false);
         return view;
+    }
+
+    public LaneView getView_lane() {
+        return view_lane;
     }
 }

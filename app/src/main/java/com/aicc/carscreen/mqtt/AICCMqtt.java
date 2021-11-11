@@ -1,22 +1,32 @@
 package com.aicc.carscreen.mqtt;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.util.Log;
 
+import androidx.fragment.app.Fragment;
+
+import com.aicc.carscreen.R;
+import com.aicc.carscreen.Utils;
 import com.aicc.carscreen.map.AICCMapView;
+import com.aicc.carscreen.view.lane.LaneDrawModel;
+import com.aicc.carscreen.view.lane.ObstacleDrawModel;
 
 import aicc_adas.AiccAdas;
 
 import org.eclipse.paho.client.mqttv3.*;
 
 import java.util.UUID;
+import java.util.function.Function;
 
 /**
  * 接收数据
  */
 public class AICCMqtt {
     //    private String[] mqttAddress = {"tcp://192.168.1.6:1883","tcp://192.168.107.33:1883"};
-    private String[] mqttAddress = {"tcp://192.168.1.6:1883", "tcp://192.168.107.33:1883","tcp://192.168.31.141:1883"};
+    private String[] mqttAddress = {"tcp://192.168.1.6:1883", "tcp://192.168.106.178:1883","tcp://192.168.31.141:1883"};
     private String clientId = "aicc_" + UUID.randomUUID();
     private MqttClient mqttClient = null;
     private MqttConnectOptions connectOptions = null;
@@ -43,11 +53,12 @@ public class AICCMqtt {
         connectOptions.setAutomaticReconnect(true);
         connectOptions.setConnectionTimeout(3);
         mqttClient = connect();
+
+
     }
 
     /**
      * 判断当前是否连接，主要为了解决mqtt服务器关闭问题
-     *
      * @return
      */
     public boolean isConnected() {
@@ -110,15 +121,39 @@ public class AICCMqtt {
         return mqttClient;
     }
 
+
+
+    /**
+     * 订阅所有topic（测试功能）
+     */
+    public void subscribeAllTopices(Handler handler){
+        if(mqttClient!=null){
+            subscribeLane(handler);
+        }
+    }
+
+    private void subscribeLane(Handler handler){
+        try {
+            mqttClient.subscribe("/hmi/lane",0,(topic,message)->{
+                Utils.sendByteArrayMessage(handler,"lane",message);
+            });
+            mqttClient.subscribe("/hmi/cipv", 0, (topic, message) -> {
+                Utils.sendByteArrayMessage(handler,"cipv",message);
+            });
+
+        } catch (MqttException e) {
+            Log.e("lane", e.getMessage());
+        }
+    }
+
     /**
      * 测试程序
-     *
      * @param args
      * @throws MqttException
      * @throws InterruptedException
      */
     public static void main(String[] args) throws MqttException, InterruptedException {
-        String broker = "tcp://192.168.107.33:1883";
+        String broker = "tcp://192.168.106.178:1883";
         String clientId = "liudian_sub";
         MqttClient mqttClient = new MqttClient(broker, clientId, null);
         MqttConnectOptions connectOptions = new MqttConnectOptions();

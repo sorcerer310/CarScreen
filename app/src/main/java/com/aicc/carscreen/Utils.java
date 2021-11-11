@@ -15,6 +15,8 @@ import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.eclipse.paho.client.mqttv3.MqttMessage;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -163,6 +165,20 @@ public class Utils {
         Message msg = new Message();
         Bundle bundle = new Bundle();
         process.accept(bundle,vmsg);
+        msg.setData(bundle);
+        h.sendMessage(msg);
+    }
+
+    /**
+     * 通用Handler发送消息函数，用于发送字节数组信息
+     * @param h
+     * @param key
+     * @param vmsg
+     */
+    public static void sendByteArrayMessage(Handler h, String key, MqttMessage vmsg){
+        Message msg = new Message();
+        Bundle bundle = new Bundle();
+        bundle.putByteArray(key,vmsg.getPayload());
         msg.setData(bundle);
         h.sendMessage(msg);
     }

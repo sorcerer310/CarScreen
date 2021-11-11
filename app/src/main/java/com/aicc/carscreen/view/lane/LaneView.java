@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -16,6 +17,8 @@ import android.widget.TextView;
 import com.aicc.carscreen.R;
 import com.aicc.carscreen.Utils;
 import com.aicc.carscreen.mqtt.AICCMqtt;
+import com.aicc.carscreen.mqtt.IMqttNotifyListener;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -30,17 +33,14 @@ import aicc_adas.AiccAdas;
 /**
  * 车道线View
  */
-public class LaneView extends View {
+public class LaneView extends View implements IMqttNotifyListener {
     private Paint mPaint;
-    private final AICCMqtt mqtt = AICCMqtt.getInstance();
-    private MqttClient mc = mqtt.getMqttClient();
     private AiccAdas.LaneLine leftLaneParams, rightLaneParams;
     private AiccAdas.CIPV cipv;
     private int dmp = 10;                                                                           //默认值:每米的像素数，1米*10dp数量
     private int car_width_meter, car_height_meter = 2;                                              //车实际宽度：2米
     private int car_width, car_height = 60;                                                         //默认值:车像素宽度、高度（90dp）
     private TextView tv_cipv, tv_lane;                                                              //由上层传入在View中不能直接获得fragment中的插件
-    private Handler m_handler = null;
 
     public LaneView(Context context) {
         super(context);
@@ -66,27 +66,12 @@ public class LaneView extends View {
      * 初始化内容
      */
     private void init() {
+
         dmp = OptionalInt.of(Integer.parseInt(Utils.getProps(getContext()).getProperty("DPM"))).orElse(0);
         car_height_meter = OptionalInt.of(Integer.parseInt(Utils.getProps(getContext()).getProperty("CAR.HEIGHT.METER"))).orElse(2);
         car_width_meter = OptionalInt.of(Integer.parseInt(Utils.getProps(getContext()).getProperty("CAR.WIDTH.METER"))).orElse(2);
         car_width = 60;                                                                             //车像素宽度
         car_height = 60;                                                                            //车像素高度
-
-        m_handler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                if (msg.getData().getString("lane") != null) {
-                    updateLane();
-                    tv_lane.setText(msg.getData().getString("lane"));
-                }
-
-                if (msg.getData().getString("cipv") != null) {
-                    updateCIPV();
-                    tv_cipv.setText(msg.getData().getString("cipv"));
-                }
-
-            }
-        };
 
         mPaint = new Paint();
         mPaint.setAntiAlias(true);                                                                  //抗锯齿
@@ -95,36 +80,6 @@ public class LaneView extends View {
         mPaint.setTextSize(36);                                                                     //绘制文字大小，单位px
         mPaint.setStrokeWidth(10);                                                                   //画笔粗细
 
-        initSubscribe();
-    }
-
-    /**
-     * 初始化订阅
-     */
-    public void initSubscribe(){
-        try {
-            mc.subscribe(Utils.getProps(this.getContext()).getProperty("HMI.LANE"), 0, (topic, message) -> {
-                if (!ldm.drawCompleted) return;
-                AiccAdas.Lane lane = AiccAdas.Lane.parseFrom(message.getPayload());
-                leftLaneParams = lane.getHasLeftBoundaryCase().getNumber() > 0 ? lane.getLeftBoundary() : null;
-                rightLaneParams = lane.getHasRightBoudnaryCase().getNumber() > 0 ? lane.getRightBoundary() : null;
-                Utils.sendMessage(m_handler,lane.toString(),(bundle,vmsg)->bundle.putString("lane",vmsg));
-
-            });
-            mc.subscribe(Utils.getProps(this.getContext()).getProperty("HMI.CIPV"), 0, (topic, message) -> {
-                if (!odm.drawCompleted) return;
-                cipv = AiccAdas.CIPV.parseFrom(message.getPayload());
-                odm.addObstacle(cipv);
-                ObstacleDrawModel.SingleObstacle singleObstacle = odm.getHashMapSingleObstacle().get(cipv.getCipv().getId());
-                if (singleObstacle!=null && singleObstacle.getBitmap() == null) {
-                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.car);
-                    odm.setBitmap(cipv.getCipv().getId(), bitmap);
-                }
-                Utils.sendMessage(m_handler,cipv.toString(),(bundle,vmsg)->bundle.putString("cipv",vmsg));
-            });
-        } catch (MqttException e) {
-            Log.e("lane", e.getMessage());
-        }
     }
 
     //假设现实中1米相当于30像素，车宽约2米，整车大约60像素宽
@@ -207,7 +162,7 @@ public class LaneView extends View {
                 float nly = (float) (leftLaneParams.getC3() * Math.pow(nlx, 3) + leftLaneParams.getC2() * Math.pow(nlx, 2) + leftLaneParams.getC1() * nlx + leftLaneParams.getC0());
                 ldm.getLeftLane().add(new float[]{nlx, nly});
                 lx = nlx;
-            }else
+            } else
                 ldm.getLeftLane().clear();
 
             if (rightLaneParams != null) {
@@ -215,8 +170,7 @@ public class LaneView extends View {
                 float nry = (float) (rightLaneParams.getC3() * Math.pow(nrx, 3) + rightLaneParams.getC2() * Math.pow(nrx, 2) + rightLaneParams.getC1() * nrx + rightLaneParams.getC0());
                 ldm.getRightLane().add(new float[]{nrx, nry});
                 rx = nrx;
-            }
-            else
+            } else
                 ldm.getRightLane();
 
         }
@@ -224,7 +178,7 @@ public class LaneView extends View {
         //2:图像放大，插值补点，让曲线更平滑
         //坐车道右车道分别处理
         for (int i = 0; i < ldm.getLaneLength(); i++) {
-            if (ldm.getLeftLane().size() == ldm.getLaneLength() && ldm.getLeftLane().size()>0) {
+            if (ldm.getLeftLane().size() == ldm.getLaneLength() && ldm.getLeftLane().size() > 0) {
                 float[] sLeftLane = ldm.getLeftLane().get(i);
                 for (int j = 1; j <= laneZoomIn; j++) {
                     sLeftLane[0] *= j;
@@ -233,7 +187,7 @@ public class LaneView extends View {
                 }
             } else ldm_zoom_in.getLeftLane().clear();
 
-            if (ldm.getRightLane().size() == ldm.getLaneLength() && ldm.getRightLane().size()>0) {
+            if (ldm.getRightLane().size() == ldm.getLaneLength() && ldm.getRightLane().size() > 0) {
                 float[] sRightLane = ldm.getRightLane().get(i);
                 for (int j = 1; j <= laneZoomIn; j++) {
                     sRightLane[0] *= j;
@@ -245,14 +199,14 @@ public class LaneView extends View {
 
         //3:坐标轴变换，并为处理车辆图片过大问题，左右各增加60dp的偏移量
         for (int i = 0; i < ldm_zoom_in.getLaneLength(); i++) {
-            if (ldm_zoom_in.getLeftLane().size() == ldm_zoom_in.getLaneLength() && ldm_zoom_in.getLeftLane().size()>0) {
+            if (ldm_zoom_in.getLeftLane().size() == ldm_zoom_in.getLaneLength() && ldm_zoom_in.getLeftLane().size() > 0) {
                 float[] sLeftLane = ldm_zoom_in.getLeftLane().get(i);
                 float[] cLeftLane = convertCoordition(sLeftLane[0], sLeftLane[1]);
                 cLeftLane[0] -= car_width * 0.75;
                 ldm_zoom_in.getLeftLane().set(i, cLeftLane);
             } else ldm_zoom_in.getLeftLane().clear();
 
-            if (ldm_zoom_in.getRightLane().size() == ldm_zoom_in.getLaneLength() && ldm_zoom_in.getRightLane().size()>0) {
+            if (ldm_zoom_in.getRightLane().size() == ldm_zoom_in.getLaneLength() && ldm_zoom_in.getRightLane().size() > 0) {
                 float[] sRightLane = ldm_zoom_in.getRightLane().get(i);
                 float[] cRightLane = convertCoordition(sRightLane[0], sRightLane[1]);
                 cRightLane[0] += car_width * 0.75;
@@ -300,8 +254,8 @@ public class LaneView extends View {
     /**
      * 调试paint的透明度
      *
-     * @param p                                                                                     //Paint对象
-     * @param idx                                                                                   //索引数据
+     * @param p   //Paint对象
+     * @param idx //索引数据
      */
     private void debugPaintStroke(Paint p, int idx) {
         if (idx % 3 == 1) p.setAlpha(0);
@@ -315,4 +269,34 @@ public class LaneView extends View {
     public void setTv_lane(TextView tv_lane) {
         this.tv_lane = tv_lane;
     }
+
+    @Override
+    public void notifyMessage(Bundle b) {
+        //接收消息后处理lane、cipv的数据
+        try {
+            if (b.getByteArray("lane") != null) {
+                if (!ldm.drawCompleted) return;
+                AiccAdas.Lane lane = AiccAdas.Lane.parseFrom(b.getByteArray("lane"));
+                leftLaneParams = lane.getHasLeftBoundaryCase().getNumber() > 0 ? lane.getLeftBoundary() : null;
+                rightLaneParams = lane.getHasRightBoudnaryCase().getNumber() > 0 ? lane.getRightBoundary() : null;
+                updateLane();
+                tv_lane.setText(lane.toString());
+            }
+            if (b.getByteArray("cipv") != null) {
+                if (!odm.drawCompleted) return;
+                cipv = AiccAdas.CIPV.parseFrom(b.getByteArray("cipv"));
+                odm.addObstacle(cipv);
+                ObstacleDrawModel.SingleObstacle singleObstacle = odm.getHashMapSingleObstacle().get(cipv.getCipv().getId());
+                if (singleObstacle != null && singleObstacle.getBitmap() == null) {
+                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.car);
+                    odm.setBitmap(cipv.getCipv().getId(), bitmap);
+                }
+                updateCIPV();
+                tv_cipv.setText(cipv.toString());
+            }
+        } catch (InvalidProtocolBufferException e) {
+            Log.e("lane", e.getMessage());
+        }
+    }
 }
+

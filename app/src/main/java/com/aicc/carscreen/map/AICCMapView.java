@@ -49,8 +49,8 @@ public class AICCMapView extends MapView {
     private AMapLocationClient mLocationClient = null;
     private AMapLocationClientOption mLocationOption = null;
     private final MyLocationStyle myLocationStyle = null;
-    private final AICCMqtt mqtt = AICCMqtt.getInstance();
-    private MqttClient mc = mqtt.getMqttClient();
+    private AICCMqtt mqtt;
+    private MqttClient mc;
     private Handler mHandler = null;
     private MarkerOptions markerOptions = null;
     private Button btZoomIn,btZoomOut = null;
@@ -104,6 +104,8 @@ public class AICCMapView extends MapView {
      * @param context
      */
     public void init(Context context) {
+         mqtt = AICCMqtt.getInstance();
+        mc  = mqtt.getMqttClient();
         System.out.println("------------------MapView init------------------------");
         if (aMap == null)
             aMap = this.getMap();

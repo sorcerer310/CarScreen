@@ -30,7 +30,7 @@ import aicc_adas.AiccAdas;
 public class TopFragment extends Fragment {
     private ImageView iv_acc, iv_lks;
     private TextView tv_acc_speed, tv_hwa, tv_change_lane, tv_horizontal_follow;
-    private AICCMqtt mqtt = AICCMqtt.getInstance();
+    private AICCMqtt mqtt;
     private Handler tvHandler = null;
     private MqttClient mqttClient = null;
     private ValueAnimator va_hwa = ValueAnimator.ofFloat(0.0f, 1.0f);
@@ -38,6 +38,7 @@ public class TopFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
         iv_acc = (ImageView) view.findViewById(R.id.iv_acc);
         iv_lks = (ImageView) view.findViewById(R.id.iv_lks);
         tv_acc_speed = (TextView) view.findViewById(R.id.tv_acc_speed);
@@ -106,6 +107,12 @@ public class TopFragment extends Fragment {
         Utils.changeTextColor(tv_horizontal_follow, Utils.IconMode.off);
         Utils.changeTextColor(tv_hwa, Utils.IconMode.off);
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mqtt = AICCMqtt.getInstance();
         mqttClient = mqtt.getMqttClient();
         if(mqttClient==null) {
             Toast.makeText(this.getContext(), "所有Mqtt服务器IP都无效，请核对Mqtt地址", Toast.LENGTH_SHORT).show();
@@ -113,6 +120,9 @@ public class TopFragment extends Fragment {
         }
         initSubscribe();
     }
+
+
+
 
     /**
      * 初始化图标，接收消息后显示接收的数据

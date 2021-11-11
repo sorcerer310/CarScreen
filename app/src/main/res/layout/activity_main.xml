@@ -69,12 +69,12 @@
                     android:id="@+id/fg_bottom"
                     android:name="com.aicc.carscreen.fragment.BottomFragment"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
+                    android:layout_height="match_parent"
+                    />
 
             </LinearLayout>
         </LinearLayout>
-
+<!--
         <com.aicc.carscreen.map.AICCMapView
             android:id="@+id/aiccmap"
             android:layout_width="0dp"
@@ -83,7 +83,7 @@
             android:clickable="true">
 
         </com.aicc.carscreen.map.AICCMapView>
-
+-->
         <AbsoluteLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
