@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         bt_reconnect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                topFragment.initSubscribe();
+//                topFragment.initSubscribe();
 //                laneFragment.initSubscribe();
                 bottomFragment.initSubscribe();
                 mapView.initSubscribe();
@@ -79,16 +79,26 @@ public class MainActivity extends AppCompatActivity {
         initSubscribe();
     }
 
-
-    void initSubscribe(){
+        void initSubscribe(){
         msgHandler = new Handler(){
             @Override
             public void handleMessage(Message msg) {
                 Bundle bundle = msg.getData();
+                //LaneView
                 if(bundle.getByteArray("lane")!=null
                     || bundle.getByteArray("cipv")!=null) {
                     laneFragment.getView_lane().notifyMessage(bundle);
                 }
+                //TopFragment
+                if(bundle.getByteArray("acc_target_value")!=null
+                        || bundle.getByteArray("acc_state_enum")!=null
+                        || bundle.getByteArray("lks")!=null
+                        || bundle.getByteArray("change_lane")!=null
+                        || bundle.getByteArray("horizontal_follow")!=null
+                        || bundle.getByteArray("hwa")!=null
+                )
+                    topFragment.notifyMessage(bundle);
+
 //                    laneFragment.setArguments(msg.getData());
             }
         };

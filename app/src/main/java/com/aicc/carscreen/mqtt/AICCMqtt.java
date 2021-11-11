@@ -129,9 +129,14 @@ public class AICCMqtt {
     public void subscribeAllTopices(Handler handler){
         if(mqttClient!=null){
             subscribeLane(handler);
+            subscribeTopFragment(handler);
         }
     }
 
+    /**
+     * 订阅车道线、障碍物主题信息
+     * @param handler
+     */
     private void subscribeLane(Handler handler){
         try {
             mqttClient.subscribe("/hmi/lane",0,(topic,message)->{
@@ -142,7 +147,31 @@ public class AICCMqtt {
             });
 
         } catch (MqttException e) {
-            Log.e("lane", e.getMessage());
+            Log.e("Lane View", e.getMessage());
+        }
+    }
+    private void subscribeTopFragment(Handler handler){
+        try{
+            mqttClient.subscribe("/hmi/state/acc",0,(topic,message)->{
+                Utils.sendByteArrayMessage(handler,"acc_state_enum",message);
+            });
+            mqttClient.subscribe("/hmi/acc_target_velocity",0,(topic,message)->{
+                Utils.sendByteArrayMessage(handler,"acc_target_value",message);
+            });
+            mqttClient.subscribe("/hmi/state/lks",0,(topic,message)->{
+                Utils.sendByteArrayMessage(handler,"lks",message);
+            });
+            mqttClient.subscribe("/hmi/state/change_lane",0,(topic,message)->{
+                Utils.sendByteArrayMessage(handler,"change_lane",message);
+            });
+            mqttClient.subscribe("/hmi/state/horizontal_follow",0,(topic,message)->{
+                Utils.sendByteArrayMessage(handler,"horizontal_follow",message);
+            });
+            mqttClient.subscribe("/hmi/state/hwa",0,(topic,message)->{
+                Utils.sendByteArrayMessage(handler,"hwa",message);
+            });
+        }catch(MqttException e){
+            Log.e("Top Fragmen",e.getMessage());
         }
     }
 

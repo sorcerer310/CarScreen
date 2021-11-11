@@ -19,6 +19,8 @@ import androidx.fragment.app.Fragment;
 import com.aicc.carscreen.R;
 import com.aicc.carscreen.Utils;
 import com.aicc.carscreen.mqtt.AICCMqtt;
+import com.aicc.carscreen.mqtt.IMqttNotifyListener;
+import com.google.protobuf.InvalidProtocolBufferException;
 
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -27,11 +29,10 @@ import java.util.Properties;
 
 import aicc_adas.AiccAdas;
 
-public class TopFragment extends Fragment {
+public class TopFragment extends Fragment implements IMqttNotifyListener {
     private ImageView iv_acc, iv_lks;
     private TextView tv_acc_speed, tv_hwa, tv_change_lane, tv_horizontal_follow;
     private AICCMqtt mqtt;
-    private Handler tvHandler = null;
     private MqttClient mqttClient = null;
     private ValueAnimator va_hwa = ValueAnimator.ofFloat(0.0f, 1.0f);
 
@@ -46,61 +47,6 @@ public class TopFragment extends Fragment {
         tv_horizontal_follow = (TextView) view.findViewById(R.id.tv_horizontal_follow);
         tv_hwa = (TextView) view.findViewById(R.id.tv_hwa);
 
-        tvHandler = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                Bundle bundle = msg.getData();
-                //目標速度
-                if (bundle.containsKey("acc_target_value"))
-                    tv_acc_speed.setText(bundle.getInt("acc_target_value") + "km/h");
-                //acc狀態
-                if (bundle.containsKey("acc_state_enum")) {
-                    switch (bundle.getInt("acc_state_enum")) {
-                        case AiccAdas.ACCState.ACCStateEnum.ACTIVE_VALUE:
-                            Utils.changeIconColor(iv_acc, Utils.IconMode.on);
-                            break;
-                        case AiccAdas.ACCState.ACCStateEnum.INACTIVE_VALUE:
-                            Utils.changeIconColor(iv_acc, Utils.IconMode.off);
-                            break;
-                        case AiccAdas.ACCState.ACCStateEnum.ON_VALUE:
-                            Utils.changeIconColor(iv_acc, Utils.IconMode.black);
-                            break;
-                        case AiccAdas.ACCState.ACCStateEnum.PAUSE_VALUE:
-                            Utils.changeIconColor(iv_acc, Utils.IconMode.standby);
-                            break;
-                        default:
-                            Utils.changeIconColor(iv_acc, Utils.IconMode.on);
-                            break;
-                    }
-                }
-
-                //lks图标状态
-                if (bundle.containsKey("lks")) {
-                    if (bundle.getBoolean("lks")) Utils.changeIconColor(iv_lks, Utils.IconMode.on);
-                    else Utils.changeIconColor(iv_lks, Utils.IconMode.off);
-                }
-
-                //change lane状态
-                if (bundle.containsKey("change_lane")) {
-                    if (bundle.getBoolean("change_lane"))
-                        Utils.changeTextColor(tv_change_lane, Utils.IconMode.on);
-                    else Utils.changeTextColor(tv_change_lane, Utils.IconMode.off);
-                }
-                //horizontal follow
-                if (bundle.containsKey("horizontal_follow")) {
-                    if (bundle.getBoolean("horizontal_follow"))
-                        Utils.changeTextColor(tv_horizontal_follow, Utils.IconMode.on);
-                    else Utils.changeTextColor(tv_horizontal_follow, Utils.IconMode.off);
-                }
-
-                //hws图标状态
-                if (bundle.containsKey("hwa")) {
-                    if (bundle.getBoolean("hwa")) Utils.changeTextColor(tv_hwa, Utils.IconMode.on);
-                    else Utils.changeTextColor(tv_hwa, Utils.IconMode.off);
-                }
-            }
-        };
-
         Utils.changeIconColor(iv_acc, Utils.IconMode.off);
         Utils.changeIconColor(iv_lks, Utils.IconMode.off);
         Utils.changeTextColor(tv_change_lane, Utils.IconMode.off);
@@ -114,36 +60,77 @@ public class TopFragment extends Fragment {
         super.onStart();
         mqtt = AICCMqtt.getInstance();
         mqttClient = mqtt.getMqttClient();
-        if(mqttClient==null) {
+        if (mqttClient == null) {
             Toast.makeText(this.getContext(), "所有Mqtt服务器IP都无效，请核对Mqtt地址", Toast.LENGTH_SHORT).show();
             return;
         }
-        initSubscribe();
     }
 
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_top, container, false);
+        return view;
+    }
 
-
-
-    /**
-     * 初始化图标，接收消息后显示接收的数据
-     */
-    public void initSubscribe() {
-        Properties properties = Utils.getProps(this.getContext());
-//        if(properties!=null ) return;
+    @Override
+    public void notifyMessage(Bundle b) {
         try {
-            //ACC圖標狀態
-            mqttClient.subscribe(properties.getProperty("HMI.STATE.ACC"), 0, (topic, message) -> {
-                AiccAdas.ACCState accState = AiccAdas.ACCState.parseFrom(message.getPayload());
-                Utils.sendMessage(tvHandler, accState.getStateValue(), (bundle, vmsg) -> bundle.putInt("acc_state_enum", vmsg));
-            });
+            //目标速度
+            if (b.getByteArray("acc_target_value") != null) {
+                AiccAdas.ACCTargetVelocity akd = AiccAdas.ACCTargetVelocity.parseFrom(b.getByteArray("acc_target_value"));
+                tv_acc_speed.setText((int) akd.getTargetVelocity() + "km/h");
+            }
+            //acc状态
+            if (b.getByteArray("acc_state_enum") != null) {
+                AiccAdas.ACCState accState = AiccAdas.ACCState.parseFrom(b.getByteArray("acc_state_enum"));
+                switch (accState.getStateValue()) {
+                    case AiccAdas.ACCState.ACCStateEnum.ACTIVE_VALUE:
+                        Utils.changeIconColor(iv_acc, Utils.IconMode.on);
+                        break;
+                    case AiccAdas.ACCState.ACCStateEnum.INACTIVE_VALUE:
+                        Utils.changeIconColor(iv_acc, Utils.IconMode.off);
+                        break;
+                    case AiccAdas.ACCState.ACCStateEnum.ON_VALUE:
+                        Utils.changeIconColor(iv_acc, Utils.IconMode.black);
+                        break;
+                    case AiccAdas.ACCState.ACCStateEnum.PAUSE_VALUE:
+                        Utils.changeIconColor(iv_acc, Utils.IconMode.standby);
+                        break;
+                    default:
+                        Utils.changeIconColor(iv_acc, Utils.IconMode.on);
+                        break;
+                }
+            }
+            //lks图标状态
+            if (b.getByteArray("lks") != null) {
+                AiccAdas.State state = AiccAdas.State.parseFrom(b.getByteArray("lks"));
+                if (state.getState()) Utils.changeIconColor(iv_lks, Utils.IconMode.on);
+                else Utils.changeIconColor(iv_lks, Utils.IconMode.off);
+            }
 
-            //顯示車的ACC速度
-            mqttClient.subscribe(properties.getProperty("HMI.ACCTARGETVELOCITY"), 0, (topic, message) -> {
-                AiccAdas.ACCTargetVelocity akd = AiccAdas.ACCTargetVelocity.parseFrom(message.getPayload());
-                Utils.sendMessage(tvHandler, (int) akd.getTargetVelocity(), (bundle, vmsg) -> bundle.putInt("acc_target_value", vmsg));
-            });
+            //change lane状态
+            if (b.getByteArray("change_lane") != null) {
+                AiccAdas.State state = AiccAdas.State.parseFrom(b.getByteArray("change_lane"));
+                if (state.getState())
+                    Utils.changeTextColor(tv_change_lane, Utils.IconMode.on);
+                else Utils.changeTextColor(tv_change_lane, Utils.IconMode.off);
+            }
+            //horizontal follow
+            if (b.getByteArray("horizontal_follow") != null) {
+                AiccAdas.State state = AiccAdas.State.parseFrom(b.getByteArray("horizontal_follow"));
+                if (state.getState())
+                    Utils.changeTextColor(tv_horizontal_follow, Utils.IconMode.on);
+                else Utils.changeTextColor(tv_horizontal_follow, Utils.IconMode.off);
+            }
 
-            //保持車距，用來顯示本車前方的車距線
+            //hws图标状态
+            if (b.getByteArray("hwa") != null) {
+                AiccAdas.State state = AiccAdas.State.parseFrom(b.getByteArray("hwa"));
+                if (state.getState()) Utils.changeTextColor(tv_hwa, Utils.IconMode.on);
+                else Utils.changeTextColor(tv_hwa, Utils.IconMode.off);
+            }
+
+            //保持車距，用來顯示本車前方的車距線(暂时未启用)
 //            mqttClient.subscribe(properties.getProperty("HMI.STATE.KEEPDISTANCE"), 0, (topic, message) -> {
 //                AiccAdas.ACCKeepDistance kd = AiccAdas.ACCKeepDistance.parseFrom(message.getPayload());
 //                Message hmsg = new Message();
@@ -152,34 +139,9 @@ public class TopFragment extends Fragment {
 //                hmsg.setData(bundle);
 //                tvHandler.sendMessage(hmsg);
 //            });
-            //LKS图标状态
-            mqttClient.subscribe(properties.getProperty("HMI.STATE.LKS"), 0, (topic, message) -> {
-                AiccAdas.State state = AiccAdas.State.parseFrom(message.getPayload());
-                Utils.sendMessage(tvHandler, state.getState(), (bundle, vmsg) -> bundle.putBoolean("lks", vmsg));
-            });
-            //换道图标状态
-            mqttClient.subscribe(properties.getProperty("HMI.STATE.CHANGELANE"), 0, (topic, message) -> {
-                AiccAdas.State state = AiccAdas.State.parseFrom(message.getPayload());
-                Utils.sendMessage(tvHandler, state.getState(), (bundle, vmsg) -> bundle.putBoolean("change_lane", vmsg));
-            });
-            //横向跟车图标
-            mqttClient.subscribe(properties.getProperty("HMI.STATE.HORIZONTALFOLLOW"), 0, (topic, message) -> {
-                AiccAdas.State state = AiccAdas.State.parseFrom(message.getPayload());
-                Utils.sendMessage(tvHandler, state.getState(), (bundle, vmsg) -> bundle.putBoolean("horizontal_follow", vmsg));
-            });
-            //hws图标
-            mqttClient.subscribe(properties.getProperty("HMI.STATE.HWA"), 0, (topic, message) -> {
-                AiccAdas.State state = AiccAdas.State.parseFrom(message.getPayload());
-                Utils.sendMessage(tvHandler, state.getState(), (bundle, vmsg) -> bundle.putBoolean("hwa", vmsg));
-            });
-        } catch (MqttException e) {
-            Log.e("top fragment", e.getMessage());
-        }
-    }
 
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_top, container, false);
-        return view;
+        } catch (InvalidProtocolBufferException e) {
+            Log.e("lane", e.getMessage());
+        }
     }
 }
