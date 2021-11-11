@@ -39,18 +39,12 @@ public class BottomFragment extends Fragment implements IMqttNotifyListener {
     private SwitchCompat sw_acc;
     private Button bt_lks, bt_cl, bt_set_plus, bt_set_sub, bt_cancel, bt_hf;
     private ImageButton ibt_keep_distance;
-//    private AICCMqtt mqtt;
-//    private MqttClient mqttClient;
     private Drawable da_no_gap, da_stage1, da_stage2, da_stage3;
     private ScheduledExecutorService seService = Executors.newScheduledThreadPool(10);
-//    private Handler bt_handler = null;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-//        mqtt = AICCMqtt.getInstance();
-//        mqttClient = mqtt.getMqttClient();
 
         bt_set_plus = (Button) view.findViewById(R.id.bt_set_plus);
         bt_cancel = (Button) view.findViewById(R.id.bt_cancel);
@@ -69,40 +63,8 @@ public class BottomFragment extends Fragment implements IMqttNotifyListener {
         da_stage2 = new BitmapDrawable(BitmapFactory.decodeResource(getResources(), R.drawable.dk_stage2));
         da_stage3 = new BitmapDrawable(BitmapFactory.decodeResource(getResources(), R.drawable.dk_stage3));
 
-//        bt_handler = new Handler() {
-//            @Override
-//            public void handleMessage(Message msg) {
-//                Bundle bundle = msg.getData();
-//                //车距保持状态
-//                if (bundle.containsKey("keep_distance")) {
-//                    switch (bundle.getInt("keep_distance")) {
-//                        case AiccAdas.ACCKeepDistance.DistanceStage.NO_GAP_VALUE:
-//                            ibt_keep_distance.setImageResource(R.drawable.dk_no_gap);
-////                            ibt_keep_distance.setBackground(da_no_gap);
-//                            break;
-//                        case AiccAdas.ACCKeepDistance.DistanceStage.STAGE1_VALUE:
-//                            ibt_keep_distance.setImageResource(R.drawable.dk_no_gap);
-//                            break;
-//                        case AiccAdas.ACCKeepDistance.DistanceStage.STAGE2_VALUE:
-//                            ibt_keep_distance.setImageResource(R.drawable.dk_stage1);
-//                            break;
-//                        case AiccAdas.ACCKeepDistance.DistanceStage.STAGE3_VALUE:
-//                            ibt_keep_distance.setImageResource(R.drawable.dk_stage2);
-//                            break;
-//                        case AiccAdas.ACCKeepDistance.DistanceStage.STAGE4_VALUE:
-//                            ibt_keep_distance.setImageResource(R.drawable.dk_stage3);
-//                            break;
-//                        default:
-//                            break;
-//                    }
-//                }
-//            }
-//        };
-
         initButton();
         initSwitchTask();
-//        initSubscribe();
-
     }
 
     /**
@@ -142,21 +104,6 @@ public class BottomFragment extends Fragment implements IMqttNotifyListener {
                 Log.e("switch", Utils.getProps(this.getContext()).getProperty("HMI.SW.ACC") + ":" + message.toString() + " " + e.getMessage());
             }
         }, 0, 100, TimeUnit.MILLISECONDS);
-    }
-
-    /**
-     * 初始化订阅部分
-     */
-    public void initSubscribe() {
-        Properties properties = Utils.getProps(this.getContext());
-//        try {
-//            mqttClient.subscribe(properties.getProperty("HMI.STATE.KEEPDISTANCE"), 0, (topic, message) -> {
-//                AiccAdas.ACCKeepDistance kd = AiccAdas.ACCKeepDistance.parseFrom(message.getPayload());
-//                Utils.sendMessage(bt_handler, kd.getKeepDistanceValue(), (bundle, vmsg) -> bundle.putInt("keep_distance", vmsg));
-//            });
-//        } catch (MqttException e) {
-//            Log.e("top fragment", e.getMessage());
-//        }
     }
 
     @Override
