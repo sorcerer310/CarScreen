@@ -24,3 +24,4 @@ local.properties
 /.idea/misc.xml
 /app/release/output-metadata.json
 /.idea/vcs.xml
+/app/src/main/jniLibs/
