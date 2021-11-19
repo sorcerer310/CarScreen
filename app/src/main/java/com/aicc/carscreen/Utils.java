@@ -84,7 +84,7 @@ public class Utils {
                 tv.setTextColor(Color.rgb(243,201,81));
                 break;
             case on:
-                tv.setTextColor(Color.GREEN);
+                tv.setTextColor(Color.rgb(65,180,85));
                 break;
             default:
                 tv.setTextColor(Color.GRAY);

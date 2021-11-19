@@ -130,6 +130,7 @@ public class AICCMqtt {
         if(mqttClient!=null){
             subscribeLane(handler);
             subscribeTopFragment(handler);
+            subscribeBottomFragment(handler);
         }
     }
 

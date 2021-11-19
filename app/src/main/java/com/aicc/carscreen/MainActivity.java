@@ -60,46 +60,46 @@ public class MainActivity extends AppCompatActivity {
 //                topFragment.initSubscribe();
 //                laneFragment.initSubscribe();
 //                bottomFragment.initSubscribe();
-                mapView.initSubscribe();
+//                mapView.initSubscribe();
 //                AICCMqtt.getInstance().reConnect();
             }
         });
 
         //每3秒检查一次mqtt的连接，如果未连接则重新连接并重新订阅。
-        seService.scheduleAtFixedRate(()->{
-            if(!AICCMqtt.getInstance().isConnected()) {
+        seService.scheduleAtFixedRate(() -> {
+            if (!AICCMqtt.getInstance().isConnected()) {
 //                System.out.println("--------------AICCMqtt is not connected");
                 AICCMqtt.getInstance().reConnect();
             }
 //            else
 //                System.out.println("++++++++++++++AICCMqtt is connected");
 
-        },0,3000, TimeUnit.MILLISECONDS);
+        }, 0, 3000, TimeUnit.MILLISECONDS);
 
         initSubscribe();
     }
 
-        void initSubscribe(){
-        msgHandler = new Handler(){
+    void initSubscribe() {
+        msgHandler = new Handler() {
             @Override
             public void handleMessage(Message msg) {
                 Bundle bundle = msg.getData();
                 //LaneView
-                if(bundle.getByteArray("lane")!=null
-                    || bundle.getByteArray("cipv")!=null) {
+                if (bundle.getByteArray("lane") != null
+                        || bundle.getByteArray("cipv") != null) {
                     laneFragment.getView_lane().notifyMessage(bundle);
                 }
                 //TopFragment
-                if(bundle.getByteArray("acc_target_value")!=null
-                        || bundle.getByteArray("acc_state_enum")!=null
-                        || bundle.getByteArray("lks")!=null
-                        || bundle.getByteArray("change_lane")!=null
-                        || bundle.getByteArray("horizontal_follow")!=null
-                        || bundle.getByteArray("hwa")!=null
+                if (bundle.getByteArray("acc_target_value") != null
+                        || bundle.getByteArray("acc_state_enum") != null
+                        || bundle.getByteArray("lks") != null
+                        || bundle.getByteArray("change_lane") != null
+                        || bundle.getByteArray("horizontal_follow") != null
+                        || bundle.getByteArray("hwa") != null
                 )
                     topFragment.notifyMessage(bundle);
 
-                if(bundle.getByteArray("keep_distance")!=null)
+                if (bundle.getByteArray("keep_distance") != null)
                     bottomFragment.notifyMessage(bundle);
 //                    laneFragment.setArguments(msg.getData());
             }
@@ -111,32 +111,42 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        mapView.onResume();
-//        mapView.getmLocationClient().startLocation();
+        if (mapView != null) {
+            mapView.onResume();
+            mapView.getmLocationClient().startLocation();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mapView.onPause();
+        if (mapView != null) {
+            mapView.onPause();
+        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mapView.getmLocationClient().stopLocation();
+        if (mapView != null) {
+            mapView.getmLocationClient().stopLocation();
+        }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        mapView.onSaveInstanceState(outState);
+        if(mapView!=null) {
+            mapView.onSaveInstanceState(outState);
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mapView.onDestroy();
-        mapView.getmLocationClient().onDestroy();
+        if(mapView!=null) {
+            mapView.onDestroy();
+            mapView.getmLocationClient().onDestroy();
+        }
     }
 }
