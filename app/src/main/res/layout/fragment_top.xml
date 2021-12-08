@@ -31,7 +31,9 @@
             android:layout_columnWeight="1"
             android:layout_gravity="center"
             android:textSize="30sp"
-            android:text="@string/tv_change_lane" />
+            android:text="@string/tv_change_lane"
+            android:visibility="gone"
+            />
         <TextView
             android:id="@+id/tv_horizontal_follow"
             android:layout_width="wrap_content"

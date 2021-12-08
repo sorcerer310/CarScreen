@@ -167,7 +167,8 @@ public class LaneView extends View implements IMqttNotifyListener {
 
             if (rightLaneParams != null) {
                 float nrx = (i + rx);
-                float nry = (float) (rightLaneParams.getC3() * Math.pow(nrx, 3) + rightLaneParams.getC2() * Math.pow(nrx, 2) + rightLaneParams.getC1() * nrx + rightLaneParams.getC0());
+                float nry = (float) (rightLaneParams.getC3() * Math.pow(nrx, 3) + rightLaneParams.getC2() * Math.pow(nrx, 2)
+                        + rightLaneParams.getC1() * nrx + rightLaneParams.getC0());
                 ldm.getRightLane().add(new float[]{nrx, nry});
                 rx = nrx;
             } else
